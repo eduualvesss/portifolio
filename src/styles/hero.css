@@ -1,0 +1,112 @@
+.hero {
+  border-top: none;
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+}
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.hero__headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0.6rem 0 1.1rem;
+  max-width: 18ch;
+}
+
+.hero__subhead {
+  max-width: 52ch;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+.hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.hero__button {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--accent-ink);
+  background: var(--accent);
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--accent);
+}
+
+.hero__button:hover {
+  color: var(--accent-ink);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.hero__link {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero__link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Spec block: a datasheet-style key/value summary. */
+.spec-block {
+  border: 1px solid var(--line-strong);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.spec-block__title {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--line-strong);
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  background: var(--paper-raised);
+}
+
+.spec-block__row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.spec-block__row:last-child {
+  border-bottom: none;
+}
+
+.spec-block__row dt {
+  color: var(--ink-faint);
+}
+
+.spec-block__row dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+.spec-block__row--live dd {
+  color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+  }
+}
