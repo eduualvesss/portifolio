@@ -5,7 +5,7 @@ you see is fetched live, on every request, from the GitHub REST API by
 this repo's own back end, not copied and pasted from GitHub into a
 webpage.
 
-**Live:** https://myportifolio-ivory-delta.vercel.app
+**Live:** https://eduualvesss-portifolio.vercel.app/
 **GitHub:** https://github.com/eduualvesss
 
 ## What this is
