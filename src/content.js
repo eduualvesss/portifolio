@@ -11,8 +11,8 @@ export const profile = {
   githubUrl: "https://github.com/eduualvesss",
   // TODO: fill these in with your real contact details before sending
   // this to anyone.
-  email: "your.email@example.com",
-  linkedinUrl: "",
+  email: "alvesnunescarloseduardo@gmail.com.com",
+  linkedinUrl: "https://www.linkedin.com/in/eduualvesss/",
 };
 
 // Repo names (case-insensitive) to hide from the project ledger, on top
@@ -31,8 +31,8 @@ export const hero = {
 // hero. Edit freely: add, remove or reorder rows.
 export const specSheet = [
   { label: "Focus", value: "Back-end APIs and systems" },
-  { label: "Toolkit", value: "C, C++, JavaScript, Node.js" },
-  { label: "Studying", value: "Computer science" },
+  { label: "Toolkit", value: "Java, C++, JavaScript, Node.js" },
+  { label: "Studying", value: "Systems Analysis and Development" },
   { label: "Also into", value: "Hardware diagnostics, PC benchmarking" },
 ];
 
