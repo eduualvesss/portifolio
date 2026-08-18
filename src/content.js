@@ -15,6 +15,11 @@ export const profile = {
   linkedinUrl: "",
 };
 
+// Repo names (case-insensitive) to hide from the project ledger, on top
+// of your profile README repo which is always excluded. Add this site's
+// own repo name here so it doesn't list itself as one of its projects.
+export const excludedRepos = ["portifolio"];
+
 export const hero = {
   eyebrow: "Portfolio / Rev. 2026",
   headline: "I build the parts of a product nobody else sees.",
