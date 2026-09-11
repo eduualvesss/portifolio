@@ -1,0 +1,890 @@
+diff --git a/src/App.jsx b/src/App.jsx
+index b2cf2af..981360f 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -1,12 +1,14 @@
+ import { useEffect, useState } from "react";
+ import Header from "./components/Header.jsx";
+ import Hero from "./components/Hero.jsx";
++import ScrollProgress from "./components/ScrollProgress.jsx";
++import TechTape from "./components/TechTape.jsx";
+ import ProjectsSection from "./components/ProjectsSection.jsx";
+ import About from "./components/About.jsx";
+ import Contact from "./components/Contact.jsx";
+ import Footer from "./components/Footer.jsx";
+ import { getProfile, getRepos } from "./api.js";
+-import { profile as staticProfile, excludedRepos } from "./content.js";
++import { profile as staticProfile, excludedRepos, toolkitTape, signoffTape } from "./content.js";
+ 
+ const OWN_README_REPO = staticProfile.githubUsername.toLowerCase();
+ const HIDDEN_REPOS = new Set([OWN_README_REPO, ...excludedRepos.map((name) => name.toLowerCase())]);
+@@ -36,12 +38,15 @@ export default function App() {
+ 
+   return (
+     <>
++      <ScrollProgress />
+       <Header />
+       <main>
+         <Hero liveStats={liveStats} />
++        <TechTape items={toolkitTape} />
+         <ProjectsSection status={repoStatus} projects={repos} isStale={isStale} />
+         <About />
+         <Contact />
++        <TechTape items={signoffTape} reverse />
+       </main>
+       <Footer />
+     </>
+diff --git a/src/components/About.jsx b/src/components/About.jsx
+index 671fd72..b35497a 100644
+--- a/src/components/About.jsx
++++ b/src/components/About.jsx
+@@ -1,14 +1,19 @@
+ import { about } from "../content.js";
++import Reveal from "./Reveal.jsx";
+ import "../styles/about.css";
+ 
+ export default function About() {
+   return (
+     <section id="about" className="about">
+       <div className="wrap about__grid">
+-        <h2 className="section-heading">{about.heading}</h2>
++        <Reveal as="h2" className="section-heading">
++          {about.heading}
++        </Reveal>
+         <div className="about__body">
+           {about.paragraphs.map((paragraph, i) => (
+-            <p key={i}>{paragraph}</p>
++            <Reveal as="p" key={i} delay={i * 0.08}>
++              {paragraph}
++            </Reveal>
+           ))}
+         </div>
+       </div>
+diff --git a/src/components/Contact.jsx b/src/components/Contact.jsx
+index e7853c1..a388dc4 100644
+--- a/src/components/Contact.jsx
++++ b/src/components/Contact.jsx
+@@ -1,4 +1,5 @@
+ import { contact, profile } from "../content.js";
++import Reveal from "./Reveal.jsx";
+ import "../styles/contact.css";
+ 
+ export default function Contact() {
+@@ -6,10 +7,14 @@ export default function Contact() {
+     <section id="contact" className="contact">
+       <div className="wrap contact__grid">
+         <div>
+-          <h2 className="section-heading">{contact.heading}</h2>
+-          <p className="section-lede">{contact.description}</p>
++          <Reveal as="h2" className="section-heading">
++            {contact.heading}
++          </Reveal>
++          <Reveal as="p" className="section-lede" delay={0.08}>
++            {contact.description}
++          </Reveal>
+         </div>
+-        <dl className="contact__list">
++        <Reveal as="dl" className="contact__list" delay={0.16}>
+           <div>
+             <dt>Email</dt>
+             <dd>
+@@ -38,7 +43,7 @@ export default function Contact() {
+             <dt>Based in</dt>
+             <dd>{profile.location}</dd>
+           </div>
+-        </dl>
++        </Reveal>
+       </div>
+     </section>
+   );
+diff --git a/src/components/Footer.jsx b/src/components/Footer.jsx
+index 6487e5b..ae6b59a 100644
+--- a/src/components/Footer.jsx
++++ b/src/components/Footer.jsx
+@@ -1,13 +1,34 @@
++import { useEffect, useState } from "react";
+ import { footer, profile } from "../content.js";
+ 
+ export default function Footer() {
++  const [time, setTime] = useState("--:--:--");
++
++  useEffect(() => {
++    function tick() {
++      setTime(
++        new Date().toLocaleTimeString("en-GB", {
++          timeZone: "America/Recife",
++          hour: "2-digit",
++          minute: "2-digit",
++          second: "2-digit",
++        }),
++      );
++    }
++    tick();
++    const id = window.setInterval(tick, 1000);
++    return () => window.clearInterval(id);
++  }, []);
++
+   return (
+     <footer className="site-footer">
+       <div className="wrap site-footer__inner">
+         <span>
+           {profile.name}, {new Date().getFullYear()}
+         </span>
+-        <span>{footer.note}</span>
++        <span>
++          {footer.note} <span className="site-footer__clock-time">{time}</span> Recife
++        </span>
+       </div>
+     </footer>
+   );
+diff --git a/src/components/Header.jsx b/src/components/Header.jsx
+index aa1f619..d74ed9f 100644
+--- a/src/components/Header.jsx
++++ b/src/components/Header.jsx
+@@ -1,3 +1,4 @@
++import { useEffect, useState } from "react";
+ import { profile } from "../content.js";
+ import "../styles/header.css";
+ 
+@@ -8,8 +9,19 @@ const NAV_ITEMS = [
+ ];
+ 
+ export default function Header() {
++  const [scrolled, setScrolled] = useState(false);
++
++  useEffect(() => {
++    function onScroll() {
++      setScrolled(window.scrollY > 8);
++    }
++    onScroll();
++    window.addEventListener("scroll", onScroll, { passive: true });
++    return () => window.removeEventListener("scroll", onScroll);
++  }, []);
++
+   return (
+-    <header className="site-header">
++    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
+       <div className="wrap site-header__inner">
+         <a href="#top" className="site-header__mark">
+           {profile.name.toUpperCase()}
+diff --git a/src/components/Hero.jsx b/src/components/Hero.jsx
+index c301521..0a31875 100644
+--- a/src/components/Hero.jsx
++++ b/src/components/Hero.jsx
+@@ -1,25 +1,57 @@
++import { useEffect, useRef } from "react";
+ import { hero, specSheet, profile } from "../content.js";
++import Reveal from "./Reveal.jsx";
+ import "../styles/hero.css";
+ 
++const SIGNAL_PATH =
++  "M0,45 L120,45 L136,45 L146,12 L156,78 L166,45 L182,45 L420,45 L434,45 L444,20 L452,68 L460,30 L468,58 L476,45 L490,45 L700,45 L714,45 L722,15 L730,45 L740,45 L1000,45";
++
+ export default function Hero({ liveStats }) {
++  const pathRef = useRef(null);
++
++  useEffect(() => {
++    const path = pathRef.current;
++    if (!path) return;
++
++    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++    if (reduceMotion) return;
++
++    const length = path.getTotalLength();
++    path.style.strokeDasharray = length;
++    path.style.strokeDashoffset = length;
++    path.getBoundingClientRect(); // force layout before the transition starts
++    path.style.transition = "stroke-dashoffset 1.8s ease";
++    requestAnimationFrame(() => {
++      requestAnimationFrame(() => {
++        path.style.strokeDashoffset = "0";
++      });
++    });
++  }, []);
++
+   return (
+     <section id="top" className="hero">
+       <div className="wrap hero__grid">
+         <div className="hero__copy">
+-          <p className="eyebrow">{hero.eyebrow}</p>
+-          <h1 className="hero__headline">{hero.headline}</h1>
+-          <p className="hero__subhead">{hero.subhead}</p>
+-          <div className="hero__actions">
++          <Reveal as="p" className="eyebrow">
++            {hero.eyebrow}
++          </Reveal>
++          <Reveal as="h1" className="hero__headline" delay={0.08}>
++            {hero.headline}
++          </Reveal>
++          <Reveal as="p" className="hero__subhead" delay={0.16}>
++            {hero.subhead}
++          </Reveal>
++          <Reveal as="div" className="hero__actions" delay={0.24}>
+             <a className="hero__button" href="#projects">
+               View projects
+             </a>
+             <a className="hero__link" href={profile.githubUrl} target="_blank" rel="noreferrer">
+               github.com/{profile.githubUsername}
+             </a>
+-          </div>
++          </Reveal>
+         </div>
+ 
+-        <dl className="spec-block" aria-label="Summary">
++        <Reveal as="dl" className="spec-block" delay={0.2} aria-label="Summary">
+           <div className="spec-block__title">SPEC</div>
+           {specSheet.map((row) => (
+             <div className="spec-block__row" key={row.label}>
+@@ -35,7 +67,17 @@ export default function Hero({ liveStats }) {
+                 : "Loading live stats..."}
+             </dd>
+           </div>
+-        </dl>
++        </Reveal>
++      </div>
++
++      <div className="wrap signal">
++        <svg viewBox="0 0 1000 90" preserveAspectRatio="none" aria-hidden="true">
++          <path ref={pathRef} d={SIGNAL_PATH} />
++        </svg>
++        <div className="signal__caption">
++          <span>SIG_01 · uptime trace</span>
++          <span>idle → request → response</span>
++        </div>
+       </div>
+     </section>
+   );
+diff --git a/src/components/LedgerStatus.jsx b/src/components/LedgerStatus.jsx
+new file mode 100644
+index 0000000..f699822
+--- /dev/null
++++ b/src/components/LedgerStatus.jsx
+@@ -0,0 +1,10 @@
++// Reads like an instrument waiting on a response, because that is
++// literally what it is: GitHub hasn't answered yet.
++export default function LedgerStatus({ label }) {
++  return (
++    <div className="ledger-status" aria-live="polite">
++      {label}
++      <span className="ledger-status__cursor" aria-hidden="true" />
++    </div>
++  );
++}
+diff --git a/src/components/ProjectRow.jsx b/src/components/ProjectRow.jsx
+index df045b1..0ca893d 100644
+--- a/src/components/ProjectRow.jsx
++++ b/src/components/ProjectRow.jsx
+@@ -2,11 +2,13 @@ import { useState } from "react";
+ import { getReadme } from "../api.js";
+ import { timeAgo, isRecentlyActive } from "../utils/formatDate.js";
+ import { profile } from "../content.js";
++import { useReveal } from "../hooks/useReveal.js";
+ 
+ export default function ProjectRow({ project, index }) {
+   const [readme, setReadme] = useState(null);
+   const [readmeStatus, setReadmeStatus] = useState("idle"); // idle | loading | loaded | error
+   const [expanded, setExpanded] = useState(false);
++  const [revealRef, revealVisible] = useReveal();
+ 
+   const partNumber = `EA-${String(index + 1).padStart(2, "0")}`;
+   const active = isRecentlyActive(project.updatedAt);
+@@ -26,7 +28,11 @@ export default function ProjectRow({ project, index }) {
+   }
+ 
+   return (
+-    <div className="ledger-row">
++    <div
++      ref={revealRef}
++      className={`ledger-row reveal${revealVisible ? " is-visible" : ""}`}
++      style={{ "--reveal-delay": `${index * 0.09}s` }}
++    >
+       <div className="ledger-row__top">
+         <span className="ledger-row__id">{partNumber}</span>
+ 
+diff --git a/src/components/ProjectsSection.jsx b/src/components/ProjectsSection.jsx
+index c1d5f54..54cbede 100644
+--- a/src/components/ProjectsSection.jsx
++++ b/src/components/ProjectsSection.jsx
+@@ -1,28 +1,29 @@
+ import { projectsSection } from "../content.js";
+ import ProjectRow from "./ProjectRow.jsx";
+-import SkeletonRow from "./SkeletonRow.jsx";
++import LedgerStatus from "./LedgerStatus.jsx";
++import Reveal from "./Reveal.jsx";
+ import "../styles/projects.css";
+ 
+ export default function ProjectsSection({ status, projects, isStale }) {
+   return (
+     <section id="projects" className="projects">
+       <div className="wrap">
+-        <p className="eyebrow">{projectsSection.eyebrow}</p>
+-        <h2 className="section-heading">{projectsSection.heading}</h2>
+-        <p className="section-lede">{projectsSection.description}</p>
++        <Reveal as="p" className="eyebrow">
++          {projectsSection.eyebrow}
++        </Reveal>
++        <Reveal as="h2" className="section-heading" delay={0.08}>
++          {projectsSection.heading}
++        </Reveal>
++        <Reveal as="p" className="section-lede" delay={0.16}>
++          {projectsSection.description}
++        </Reveal>
+ 
+         {isStale && status === "loaded" && (
+           <p className="notice-bar">{projectsSection.errorState}</p>
+         )}
+ 
+         <div className="ledger" role="list">
+-          {status === "loading" && (
+-            <>
+-              <SkeletonRow />
+-              <SkeletonRow />
+-              <SkeletonRow />
+-            </>
+-          )}
++          {status === "loading" && <LedgerStatus label="FETCHING REPOSITORY LEDGER" />}
+ 
+           {status === "error" && <p className="notice-bar notice-bar--error">{projectsSection.errorState}</p>}
+ 
+diff --git a/src/components/Reveal.jsx b/src/components/Reveal.jsx
+new file mode 100644
+index 0000000..1bbb485
+--- /dev/null
++++ b/src/components/Reveal.jsx
+@@ -0,0 +1,12 @@
++import { useReveal } from "../hooks/useReveal.js";
++
++export default function Reveal({ as: Tag = "div", delay = 0, className = "", children, ...rest }) {
++  const [ref, visible] = useReveal();
++  const classes = ["reveal", visible ? "is-visible" : null, className || null].filter(Boolean).join(" ");
++
++  return (
++    <Tag ref={ref} className={classes} style={{ "--reveal-delay": `${delay}s` }} {...rest}>
++      {children}
++    </Tag>
++  );
++}
+diff --git a/src/components/ScrollProgress.jsx b/src/components/ScrollProgress.jsx
+new file mode 100644
+index 0000000..15fa54b
+--- /dev/null
++++ b/src/components/ScrollProgress.jsx
+@@ -0,0 +1,36 @@
++import { useEffect, useRef } from "react";
++
++const prefersReducedMotion =
++  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++
++export default function ScrollProgress() {
++  const barRef = useRef(null);
++
++  useEffect(() => {
++    if (prefersReducedMotion) return undefined;
++
++    let ticking = false;
++
++    function update() {
++      const { scrollHeight, clientHeight } = document.documentElement;
++      const max = scrollHeight - clientHeight;
++      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
++      if (barRef.current) barRef.current.style.width = `${pct}%`;
++      ticking = false;
++    }
++
++    function onScroll() {
++      if (!ticking) {
++        ticking = true;
++        requestAnimationFrame(update);
++      }
++    }
++
++    update();
++    window.addEventListener("scroll", onScroll, { passive: true });
++    return () => window.removeEventListener("scroll", onScroll);
++  }, []);
++
++  if (prefersReducedMotion) return null;
++  return <div className="scroll-progress" ref={barRef} aria-hidden="true" />;
++}
+diff --git a/src/components/SkeletonRow.jsx b/src/components/SkeletonRow.jsx
+deleted file mode 100644
+index bacd6e3..0000000
+--- a/src/components/SkeletonRow.jsx
++++ /dev/null
+@@ -1,17 +0,0 @@
+-export default function SkeletonRow() {
+-  return (
+-    <div className="ledger-row ledger-row--skeleton" aria-hidden="true">
+-      <div className="ledger-row__id">
+-        <span className="skeleton-block skeleton-block--id" />
+-      </div>
+-      <div className="ledger-row__main">
+-        <span className="skeleton-block skeleton-block--title" />
+-        <span className="skeleton-block skeleton-block--desc" />
+-      </div>
+-      <div className="ledger-row__meta">
+-        <span className="skeleton-block skeleton-block--meta" />
+-        <span className="skeleton-block skeleton-block--meta" />
+-      </div>
+-    </div>
+-  );
+-}
+diff --git a/src/components/TechTape.jsx b/src/components/TechTape.jsx
+new file mode 100644
+index 0000000..47f50d7
+--- /dev/null
++++ b/src/components/TechTape.jsx
+@@ -0,0 +1,19 @@
++import "../styles/tape.css";
++
++// Duplicated once so the loop has no visible seam. aria-hidden: this is
++// a decorative restatement of info that's already in the page as text.
++export default function TechTape({ items, reverse = false }) {
++  const doubled = [...items, ...items];
++
++  return (
++    <div className="tape" aria-hidden="true">
++      <div className={`tape__track${reverse ? " tape__track--reverse" : ""}`}>
++        {doubled.map((item, i) => (
++          <span className="tape__item" key={`${item}-${i}`}>
++            {item}
++          </span>
++        ))}
++      </div>
++    </div>
++  );
++}
+diff --git a/src/content.js b/src/content.js
+index 0c603af..31d5402 100644
+--- a/src/content.js
++++ b/src/content.js
+@@ -21,30 +21,45 @@ export const profile = {
+ export const excludedRepos = ["portifolio"];
+ 
+ export const hero = {
+-  eyebrow: "Portfolio / Rev. 2026",
++  eyebrow: "Portfolio / Rev. 2026.2",
+   headline: "I build the parts of a product nobody else sees.",
+   subhead:
+-    "Computer science student and back-end developer based in Recife, Brazil. I spend most of my time on APIs, data and the systems underneath them, and the rest of it taking hardware apart to see how it fails.",
++    "Systems Analysis and Development student and back-end developer based in Recife, Brazil, currently on the hunt for a back-end internship. I spend most of my time on APIs, data and the systems underneath them, and the rest of it taking hardware apart to see how it fails.",
+ };
+ 
+ // Key-value pairs rendered as a datasheet-style spec block next to the
+ // hero. Edit freely: add, remove or reorder rows.
+ export const specSheet = [
+   { label: "Focus", value: "Back-end APIs and systems" },
+-  { label: "Toolkit", value: "Java, C++, JavaScript, Node.js" },
+-  { label: "Studying", value: "Systems Analysis and Development" },
++  { label: "Toolkit", value: "Java, C, C++, C#, JavaScript, Node.js" },
++  { label: "Studying", value: "ADS (Systems Analysis & Development), FICR" },
++  { label: "Looking for", value: "Back-end internship opportunities" },
+   { label: "Also into", value: "Hardware diagnostics, PC benchmarking" },
+ ];
+ 
+ export const about = {
+   heading: "About",
+   paragraphs: [
+-    "Most of what I build starts from a real, specific problem rather than a blank page. That habit carries over from outside of code too: I have diagnosed a fault on a smart TV's board down to the likely component, reverse-engineered a mechanical keyboard's PCB after four keys stopped registering, and benchmarked and stabilized a secondhand server processor running outside its original spec.",
+-    "That same approach shapes how I write software. I would rather understand the failure case than avoid it, which is part of why this site's back end is built to keep working, serving cached data, even if GitHub's API is slow or rate-limited.",
+-    "Outside of engineering, I ride a Honda CB Twister and I am slowly getting better at long-fermentation pizza dough. Both reward the same thing code does: patience with a process you cannot rush.",
++    "Most of what I build starts from a real, specific problem rather than a blank page. During a technical residency at Porto Digital's Embarque Digital innovation lab, that meant mapping how people actually used a product before touching its UX, then untangling the back-end rules underneath it. Outside of code, the same instinct shows up: I have diagnosed a fault on a smart TV's board down to the likely component, reverse-engineered a mechanical keyboard's PCB after four keys stopped registering, and benchmarked and stabilized a secondhand server processor running outside its original spec.",
++    "That approach carries into the projects below. The oldest is a point-of-sale system for a small market, written in plain C, with a homemade binary encryption layer because I decided the register data deserved better than a text file. The newest is a Node.js and PostgreSQL HR system for Porto Digital, where I ended up as engineering manager for the back end almost by accident, JWT auth, hashed passwords and all.",
++    "Outside of engineering, I ride a Honda CB Twister, I am slowly getting better at long-fermentation pizza dough, and I write Minecraft mods that tell me exactly how much my own laptop is suffering. If you happen to be hiring back-end interns in Recife, this paragraph is doing exactly what it looks like it's doing.",
+   ],
+ };
+ 
++// Two marquee strips reusing the same component: one just below the
++// hero, one just above the footer, running the opposite direction.
++export const toolkitTape = ["NODE.JS", "EXPRESS", "POSTGRESQL", "JAVA", "C", "C++", "C#", "JWT AUTH", "REST APIS", "GIT"];
++export const signoffTape = [
++  "OPEN TO BACK-END INTERNSHIPS",
++  "RECIFE, BRAZIL",
++  "JAVA",
++  "NODE.JS",
++  "C",
++  "C++",
++  "C#",
++  "REPLIES FASTER THAN MY API DOES",
++];
++
+ export const projectsSection = {
+   heading: "Projects",
+   eyebrow: "Live from the GitHub API",
+diff --git a/src/hooks/useReveal.js b/src/hooks/useReveal.js
+new file mode 100644
+index 0000000..dbf2d05
+--- /dev/null
++++ b/src/hooks/useReveal.js
+@@ -0,0 +1,31 @@
++import { useEffect, useRef, useState } from "react";
++
++const prefersReducedMotion =
++  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++
++// One motion vocabulary, reused everywhere: rise + fade + light
++// blur-in, once, on scroll into view. No hover-triggered variant.
++export function useReveal() {
++  const ref = useRef(null);
++  const [visible, setVisible] = useState(prefersReducedMotion);
++
++  useEffect(() => {
++    if (prefersReducedMotion || !ref.current) return undefined;
++
++    const node = ref.current;
++    const observer = new IntersectionObserver(
++      ([entry]) => {
++        if (entry.isIntersecting) {
++          setVisible(true);
++          observer.unobserve(node);
++        }
++      },
++      { threshold: 0.15 },
++    );
++
++    observer.observe(node);
++    return () => observer.disconnect();
++  }, []);
++
++  return [ref, visible];
++}
+diff --git a/src/styles/global.css b/src/styles/global.css
+index 39f1936..77e10b1 100644
+--- a/src/styles/global.css
++++ b/src/styles/global.css
+@@ -1,23 +1,25 @@
+ /* ---------------------------------------------------------------------
+    Design tokens
+-   A datasheet / bench-log aesthetic: flat paper background, hairline
+-   rules instead of borders-with-shadows, one functional accent colour
+-   (PCB solder-mask green) and a second used only for status text.
+-   No radius, no shadows, no gradients, by choice.
++   A dark bench-instrument variant of the same datasheet aesthetic:
++   PCB-substrate background (not flat #000), hairline rules instead of
++   borders-with-shadows, one functional accent colour (muted phosphor
++   green, used only for live/active signal) and a second used only for
++   stale status text. No shadows, no gradients, by choice. A small
++   radius on boxed elements only — hairlines and rules stay sharp.
+ ------------------------------------------------------------------------ */
+ 
+ :root {
+-  --paper: #e9ece7;
+-  --paper-raised: #dfe3dc;
+-  --ink: #14181a;
+-  --ink-soft: #4b544f;
+-  --ink-faint: #7c847e;
+-  --line: #b9c0b6;
+-  --line-strong: #14181a;
+-  --accent: #1f6f4a;
+-  --accent-ink: #ffffff;
+-  --status-live: #1f6f4a;
+-  --status-stale: #a15c2e;
++  --paper: #0d110f;
++  --paper-raised: #151c17;
++  --ink: #edf1ec;
++  --ink-soft: #9aa69d;
++  --ink-faint: #59645d;
++  --line: #232d27;
++  --line-strong: #edf1ec;
++  --accent: #5aa579;
++  --accent-ink: #07100a;
++  --status-live: #5aa579;
++  --status-stale: #c98a4c;
+ 
+   --font-display: "Archivo Expanded", "Arial Narrow", sans-serif;
+   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
+@@ -25,6 +27,7 @@
+ 
+   --measure: 76rem;
+   --gutter: clamp(1.25rem, 4vw, 3rem);
++  --radius: 8px;
+ }
+ 
+ * {
+@@ -32,7 +35,7 @@
+ }
+ 
+ html {
+-  color-scheme: light;
++  color-scheme: dark;
+ }
+ 
+ body {
+@@ -116,7 +119,52 @@ section {
+   color: var(--ink-faint);
+ }
+ 
++.site-footer__clock-time {
++  color: var(--ink-soft);
++  font-variant-numeric: tabular-nums;
++}
++
++/* Scroll progress — tied continuously to scroll position, not a
++   one-shot reveal. Same accent, no glow. */
++.scroll-progress {
++  position: fixed;
++  top: 0;
++  left: 0;
++  height: 2px;
++  width: 0%;
++  background: var(--accent);
++  z-index: 20;
++}
++
++/* Reveal-on-scroll: one motion vocabulary, reused everywhere. Rise,
++   fade and a light blur-in, staggered per element via --reveal-delay.
++   No hover-triggered motion anywhere in this system. */
++.reveal {
++  opacity: 0;
++  transform: translateY(22px);
++  filter: blur(6px);
++  transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
++  transition-delay: var(--reveal-delay, 0s);
++}
++
++.reveal.is-visible {
++  opacity: 1;
++  transform: translateY(0);
++  filter: blur(0);
++}
++
+ @media (prefers-reduced-motion: reduce) {
++  .reveal {
++    opacity: 1;
++    transform: none;
++    filter: none;
++    transition: none;
++  }
++
++  .scroll-progress {
++    display: none;
++  }
++
+   * {
+     animation-duration: 0.001ms !important;
+     animation-iteration-count: 1 !important;
+diff --git a/src/styles/header.css b/src/styles/header.css
+index 8d134a8..1099e91 100644
+--- a/src/styles/header.css
++++ b/src/styles/header.css
+@@ -1,11 +1,16 @@
+ .site-header {
+-  border-bottom: 1px solid var(--line);
++  border-bottom: 1px solid transparent;
+   position: sticky;
+   top: 0;
+-  background: var(--paper);
++  background: rgba(13, 17, 15, 0.86);
++  backdrop-filter: blur(8px);
+   z-index: 10;
+ }
+ 
++.site-header.is-scrolled {
++  border-bottom-color: var(--line);
++}
++
+ .site-header__inner {
+   display: flex;
+   align-items: center;
+diff --git a/src/styles/hero.css b/src/styles/hero.css
+index dc8db5e..dea2f7c 100644
+--- a/src/styles/hero.css
++++ b/src/styles/hero.css
+@@ -43,6 +43,7 @@
+   background: var(--accent);
+   padding: 0.75rem 1.25rem;
+   border: 1px solid var(--accent);
++  border-radius: var(--radius);
+ }
+ 
+ .hero__button:hover {
+@@ -64,9 +65,45 @@
+   border-color: var(--accent);
+ }
+ 
++/* Signal trace — the hero's one bold moment. A literal instrument
++   reading, not decoration: draws itself once on load, then sits
++   still. Nothing here reacts to hover or repeats. */
++.signal {
++  margin-top: clamp(2rem, 5vw, 3.5rem);
++  border-top: 1px solid var(--line);
++  border-bottom: 1px solid var(--line);
++  padding-block: 0.75rem;
++}
++
++.signal svg {
++  display: block;
++  width: 100%;
++  height: auto;
++}
++
++.signal path {
++  fill: none;
++  stroke: var(--accent);
++  stroke-width: 1.5;
++  stroke-linecap: round;
++  stroke-linejoin: round;
++}
++
++.signal__caption {
++  font-family: var(--font-mono);
++  font-size: 0.7rem;
++  color: var(--ink-faint);
++  letter-spacing: 0.08em;
++  display: flex;
++  justify-content: space-between;
++  margin-top: 0.4rem;
++}
++
+ /* Spec block: a datasheet-style key/value summary. */
+ .spec-block {
+   border: 1px solid var(--line-strong);
++  border-radius: var(--radius);
++  overflow: hidden;
+   margin: 0;
+   font-family: var(--font-mono);
+   font-size: 0.82rem;
+diff --git a/src/styles/projects.css b/src/styles/projects.css
+index c79d065..2fcf0ac 100644
+--- a/src/styles/projects.css
++++ b/src/styles/projects.css
+@@ -29,12 +29,15 @@
+ }
+ 
+ .ledger {
+-  border-top: 1px solid var(--line-strong);
++  display: flex;
++  flex-direction: column;
++  gap: 0.85rem;
+ }
+ 
+ .ledger-row {
+-  border-bottom: 1px solid var(--line);
+-  padding-block: 1.5rem;
++  border: 1px solid var(--line);
++  border-radius: var(--radius);
++  padding: 1.25rem 1.5rem;
+ }
+ 
+ .ledger-row__top {
+@@ -186,44 +189,30 @@
+   color: var(--ink);
+ }
+ 
+-/* Skeleton loader: solid blocks with a plain opacity pulse.
+-   No shimmering gradient sweep, on purpose. */
+-.skeleton-block {
+-  display: block;
+-  background: var(--paper-raised);
+-  animation: pulse 1.4s ease-in-out infinite;
+-}
+-
+-@keyframes pulse {
+-  0%,
+-  100% {
+-    opacity: 1;
+-  }
+-  50% {
+-    opacity: 0.45;
+-  }
+-}
+-
+-.skeleton-block--id {
+-  width: 2.2rem;
+-  height: 0.9rem;
+-}
+-
+-.skeleton-block--title {
+-  width: 40%;
+-  height: 1.3rem;
+-  margin-bottom: 0.6rem;
++/* Loading state: a plain text line with a blinking cursor, styled like
++   an instrument waiting on a response — because that is what it is.
++   No shimmer sweep, on purpose. */
++.ledger-status {
++  font-family: var(--font-mono);
++  font-size: 0.78rem;
++  color: var(--ink-faint);
++  padding: 1.25rem 1.5rem;
++  border: 1px solid var(--line);
++  border-radius: var(--radius);
+ }
+ 
+-.skeleton-block--desc {
+-  width: 75%;
+-  height: 0.9rem;
++.ledger-status__cursor {
++  display: inline-block;
++  width: 0.55em;
++  background: var(--ink-faint);
++  animation: blink 1s steps(1) infinite;
++  margin-left: 0.15em;
+ }
+ 
+-.skeleton-block--meta {
+-  width: 100%;
+-  height: 0.85rem;
+-  margin-bottom: 0.4rem;
++@keyframes blink {
++  50% {
++    opacity: 0;
++  }
+ }
+ 
+ .ledger-row--skeleton .ledger-row__top {
+diff --git a/src/styles/tape.css b/src/styles/tape.css
+new file mode 100644
+index 0000000..a784aa2
+--- /dev/null
++++ b/src/styles/tape.css
+@@ -0,0 +1,50 @@
++/* Tech-stack marquee. Reused as a pinout strip, not a decorative logo
++   carousel: two instances on the page, running in opposite directions.
++   Never pauses or reacts on hover — no hover-triggered motion anywhere
++   in this system. */
++
++.tape {
++  overflow: hidden;
++  background: var(--paper-raised);
++  border-top: 1px solid var(--line);
++  border-bottom: 1px solid var(--line);
++}
++
++.tape__track {
++  display: flex;
++  width: max-content;
++  animation: tape-scroll 32s linear infinite;
++}
++
++.tape__track--reverse {
++  animation-name: tape-scroll-reverse;
++  animation-duration: 26s;
++}
++
++.tape__item {
++  font-family: var(--font-mono);
++  font-size: 0.76rem;
++  letter-spacing: 0.06em;
++  color: var(--ink-soft);
++  padding: 0.85rem 1.25rem;
++  white-space: nowrap;
++  border-right: 1px solid var(--line);
++}
++
++@keyframes tape-scroll {
++  from {
++    transform: translateX(0);
++  }
++  to {
++    transform: translateX(-50%);
++  }
++}
++
++@keyframes tape-scroll-reverse {
++  from {
++    transform: translateX(-50%);
++  }
++  to {
++    transform: translateX(0);
++  }
++}

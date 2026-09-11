@@ -1,4 +1,5 @@
 import { contact, profile } from "../content.js";
+import Reveal from "./Reveal.jsx";
 import "../styles/contact.css";
 
 export default function Contact() {
@@ -6,10 +7,14 @@ export default function Contact() {
     <section id="contact" className="contact">
       <div className="wrap contact__grid">
         <div>
-          <h2 className="section-heading">{contact.heading}</h2>
-          <p className="section-lede">{contact.description}</p>
+          <Reveal as="h2" className="section-heading">
+            {contact.heading}
+          </Reveal>
+          <Reveal as="p" className="section-lede" delay={0.08}>
+            {contact.description}
+          </Reveal>
         </div>
-        <dl className="contact__list">
+        <Reveal as="dl" className="contact__list" delay={0.16}>
           <div>
             <dt>Email</dt>
             <dd>
@@ -38,7 +43,7 @@ export default function Contact() {
             <dt>Based in</dt>
             <dd>{profile.location}</dd>
           </div>
-        </dl>
+        </Reveal>
       </div>
     </section>
   );

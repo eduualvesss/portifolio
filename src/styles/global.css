@@ -1,23 +1,25 @@
 /* ---------------------------------------------------------------------
    Design tokens
-   A datasheet / bench-log aesthetic: flat paper background, hairline
-   rules instead of borders-with-shadows, one functional accent colour
-   (PCB solder-mask green) and a second used only for status text.
-   No radius, no shadows, no gradients, by choice.
+   A dark bench-instrument variant of the same datasheet aesthetic:
+   PCB-substrate background (not flat #000), hairline rules instead of
+   borders-with-shadows, one functional accent colour (muted phosphor
+   green, used only for live/active signal) and a second used only for
+   stale status text. No shadows, no gradients, by choice. A small
+   radius on boxed elements only — hairlines and rules stay sharp.
 ------------------------------------------------------------------------ */
 
 :root {
-  --paper: #e9ece7;
-  --paper-raised: #dfe3dc;
-  --ink: #14181a;
-  --ink-soft: #4b544f;
-  --ink-faint: #7c847e;
-  --line: #b9c0b6;
-  --line-strong: #14181a;
-  --accent: #1f6f4a;
-  --accent-ink: #ffffff;
-  --status-live: #1f6f4a;
-  --status-stale: #a15c2e;
+  --paper: #0d110f;
+  --paper-raised: #151c17;
+  --ink: #edf1ec;
+  --ink-soft: #9aa69d;
+  --ink-faint: #59645d;
+  --line: #232d27;
+  --line-strong: #edf1ec;
+  --accent: #5aa579;
+  --accent-ink: #07100a;
+  --status-live: #5aa579;
+  --status-stale: #c98a4c;
 
   --font-display: "Archivo Expanded", "Arial Narrow", sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
@@ -25,6 +27,7 @@
 
   --measure: 76rem;
   --gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius: 8px;
 }
 
 * {
@@ -32,7 +35,7 @@
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
@@ -116,7 +119,52 @@ section {
   color: var(--ink-faint);
 }
 
+.site-footer__clock-time {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scroll progress — tied continuously to scroll position, not a
+   one-shot reveal. Same accent, no glow. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  z-index: 20;
+}
+
+/* Reveal-on-scroll: one motion vocabulary, reused everywhere. Rise,
+   fade and a light blur-in, staggered per element via --reveal-delay.
+   No hover-triggered motion anywhere in this system. */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(6px);
+  transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+
+  .scroll-progress {
+    display: none;
+  }
+
   * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

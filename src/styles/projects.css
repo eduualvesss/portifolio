@@ -29,12 +29,15 @@
 }
 
 .ledger {
-  border-top: 1px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .ledger-row {
-  border-bottom: 1px solid var(--line);
-  padding-block: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
 }
 
 .ledger-row__top {
@@ -186,44 +189,30 @@
   color: var(--ink);
 }
 
-/* Skeleton loader: solid blocks with a plain opacity pulse.
-   No shimmering gradient sweep, on purpose. */
-.skeleton-block {
-  display: block;
-  background: var(--paper-raised);
-  animation: pulse 1.4s ease-in-out infinite;
+/* Loading state: a plain text line with a blinking cursor, styled like
+   an instrument waiting on a response — because that is what it is.
+   No shimmer sweep, on purpose. */
+.ledger-status {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
+.ledger-status__cursor {
+  display: inline-block;
+  width: 0.55em;
+  background: var(--ink-faint);
+  animation: blink 1s steps(1) infinite;
+  margin-left: 0.15em;
+}
+
+@keyframes blink {
   50% {
-    opacity: 0.45;
+    opacity: 0;
   }
-}
-
-.skeleton-block--id {
-  width: 2.2rem;
-  height: 0.9rem;
-}
-
-.skeleton-block--title {
-  width: 40%;
-  height: 1.3rem;
-  margin-bottom: 0.6rem;
-}
-
-.skeleton-block--desc {
-  width: 75%;
-  height: 0.9rem;
-}
-
-.skeleton-block--meta {
-  width: 100%;
-  height: 0.85rem;
-  margin-bottom: 0.4rem;
 }
 
 .ledger-row--skeleton .ledger-row__top {

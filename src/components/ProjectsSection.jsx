@@ -1,28 +1,29 @@
 import { projectsSection } from "../content.js";
 import ProjectRow from "./ProjectRow.jsx";
-import SkeletonRow from "./SkeletonRow.jsx";
+import LedgerStatus from "./LedgerStatus.jsx";
+import Reveal from "./Reveal.jsx";
 import "../styles/projects.css";
 
 export default function ProjectsSection({ status, projects, isStale }) {
   return (
     <section id="projects" className="projects">
       <div className="wrap">
-        <p className="eyebrow">{projectsSection.eyebrow}</p>
-        <h2 className="section-heading">{projectsSection.heading}</h2>
-        <p className="section-lede">{projectsSection.description}</p>
+        <Reveal as="p" className="eyebrow">
+          {projectsSection.eyebrow}
+        </Reveal>
+        <Reveal as="h2" className="section-heading" delay={0.08}>
+          {projectsSection.heading}
+        </Reveal>
+        <Reveal as="p" className="section-lede" delay={0.16}>
+          {projectsSection.description}
+        </Reveal>
 
         {isStale && status === "loaded" && (
           <p className="notice-bar">{projectsSection.errorState}</p>
         )}
 
         <div className="ledger" role="list">
-          {status === "loading" && (
-            <>
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
-            </>
-          )}
+          {status === "loading" && <LedgerStatus label="FETCHING REPOSITORY LEDGER" />}
 
           {status === "error" && <p className="notice-bar notice-bar--error">{projectsSection.errorState}</p>}
 

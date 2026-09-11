@@ -43,6 +43,7 @@
   background: var(--accent);
   padding: 0.75rem 1.25rem;
   border: 1px solid var(--accent);
+  border-radius: var(--radius);
 }
 
 .hero__button:hover {
@@ -64,9 +65,45 @@
   border-color: var(--accent);
 }
 
+/* Signal trace — the hero's one bold moment. A literal instrument
+   reading, not decoration: draws itself once on load, then sits
+   still. Nothing here reacts to hover or repeats. */
+.signal {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding-block: 0.75rem;
+}
+
+.signal svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.signal path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.signal__caption {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+}
+
 /* Spec block: a datasheet-style key/value summary. */
 .spec-block {
   border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.82rem;

@@ -2,11 +2,13 @@ import { useState } from "react";
 import { getReadme } from "../api.js";
 import { timeAgo, isRecentlyActive } from "../utils/formatDate.js";
 import { profile } from "../content.js";
+import { useReveal } from "../hooks/useReveal.js";
 
 export default function ProjectRow({ project, index }) {
   const [readme, setReadme] = useState(null);
   const [readmeStatus, setReadmeStatus] = useState("idle"); // idle | loading | loaded | error
   const [expanded, setExpanded] = useState(false);
+  const [revealRef, revealVisible] = useReveal();
 
   const partNumber = `EA-${String(index + 1).padStart(2, "0")}`;
   const active = isRecentlyActive(project.updatedAt);
@@ -26,7 +28,11 @@ export default function ProjectRow({ project, index }) {
   }
 
   return (
-    <div className="ledger-row">
+    <div
+      ref={revealRef}
+      className={`ledger-row reveal${revealVisible ? " is-visible" : ""}`}
+      style={{ "--reveal-delay": `${index * 0.09}s` }}
+    >
       <div className="ledger-row__top">
         <span className="ledger-row__id">{partNumber}</span>
 

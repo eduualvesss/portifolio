@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { profile } from "../content.js";
 import "../styles/header.css";
 
@@ -8,8 +9,19 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 8);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="site-header">
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <div className="wrap site-header__inner">
         <a href="#top" className="site-header__mark">
           {profile.name.toUpperCase()}

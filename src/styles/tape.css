@@ -1,0 +1,50 @@
+/* Tech-stack marquee. Reused as a pinout strip, not a decorative logo
+   carousel: two instances on the page, running in opposite directions.
+   Never pauses or reacts on hover — no hover-triggered motion anywhere
+   in this system. */
+
+.tape {
+  overflow: hidden;
+  background: var(--paper-raised);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.tape__track {
+  display: flex;
+  width: max-content;
+  animation: tape-scroll 32s linear infinite;
+}
+
+.tape__track--reverse {
+  animation-name: tape-scroll-reverse;
+  animation-duration: 26s;
+}
+
+.tape__item {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  padding: 0.85rem 1.25rem;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+}
+
+@keyframes tape-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes tape-scroll-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

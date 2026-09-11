@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
+import ScrollProgress from "./components/ScrollProgress.jsx";
+import TechTape from "./components/TechTape.jsx";
 import ProjectsSection from "./components/ProjectsSection.jsx";
 import About from "./components/About.jsx";
 import Contact from "./components/Contact.jsx";
 import Footer from "./components/Footer.jsx";
 import { getProfile, getRepos } from "./api.js";
-import { profile as staticProfile, excludedRepos } from "./content.js";
+import { profile as staticProfile, excludedRepos, toolkitTape, signoffTape } from "./content.js";
 
 const OWN_README_REPO = staticProfile.githubUsername.toLowerCase();
 const HIDDEN_REPOS = new Set([OWN_README_REPO, ...excludedRepos.map((name) => name.toLowerCase())]);
@@ -36,12 +38,15 @@ export default function App() {
 
   return (
     <>
+      <ScrollProgress />
       <Header />
       <main>
         <Hero liveStats={liveStats} />
+        <TechTape items={toolkitTape} />
         <ProjectsSection status={repoStatus} projects={repos} isStale={isStale} />
         <About />
         <Contact />
+        <TechTape items={signoffTape} reverse />
       </main>
       <Footer />
     </>
