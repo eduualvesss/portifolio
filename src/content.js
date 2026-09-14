@@ -11,7 +11,7 @@ export const profile = {
   githubUrl: "https://github.com/eduualvesss",
   // TODO: fill these in with your real contact details before sending
   // this to anyone.
-  email: "alvesnunescarloseduardo@gmail.com.com",
+  email: "alvesnunescarloseduardo@gmail.com",
   linkedinUrl: "https://www.linkedin.com/in/eduualvesss/",
 };
 
