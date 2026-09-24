@@ -41,10 +41,12 @@ export async function fetchProfile(username) {
 }
 
 export async function fetchRepos(username) {
-  const repos = await githubFetch(`/users/${username}/repos?per_page=100&sort=pushed`);
+  // Endpoint de starred retorna repo de qualquer dono que o usuário estrelou.
+  // Filtro por owner pra sobrar só projeto próprio marcado com estrela por ele mesmo.
+  const starred = await githubFetch(`/users/${username}/starred?per_page=100&sort=updated`);
 
-  return repos
-    .filter((repo) => !repo.private)
+  return starred
+    .filter((repo) => !repo.private && repo.owner.login.toLowerCase() === username.toLowerCase())
     .map((repo) => ({
       id: repo.id,
       name: repo.name,
