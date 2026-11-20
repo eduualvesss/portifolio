@@ -1,4 +1,5 @@
 const GITHUB_API = "https://api.github.com";
+const REQUEST_TIMEOUT_MS = 8000;
 
 function authHeaders() {
   const headers = {
@@ -13,7 +14,10 @@ function authHeaders() {
 }
 
 async function githubFetch(path) {
-  const res = await fetch(`${GITHUB_API}${path}`, { headers: authHeaders() });
+  const res = await fetch(`${GITHUB_API}${path}`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -26,7 +30,7 @@ async function githubFetch(path) {
 }
 
 export async function fetchProfile(username) {
-  const user = await githubFetch(`/users/${username}`);
+  const user = await githubFetch(`/users/${encodeURIComponent(username)}`);
   return {
     username: user.login,
     name: user.name,
@@ -43,7 +47,9 @@ export async function fetchProfile(username) {
 export async function fetchRepos(username) {
   // Endpoint de starred retorna repo de qualquer dono que o usuário estrelou.
   // Filtro por owner pra sobrar só projeto próprio marcado com estrela por ele mesmo.
-  const starred = await githubFetch(`/users/${username}/starred?per_page=100&sort=updated`);
+  const starred = await githubFetch(
+    `/users/${encodeURIComponent(username)}/starred?per_page=100&sort=updated`
+  );
 
   return starred
     .filter((repo) => !repo.private && repo.owner.login.toLowerCase() === username.toLowerCase())
@@ -67,7 +73,9 @@ export async function fetchRepos(username) {
 }
 
 export async function fetchReadme(owner, repo) {
-  const data = await githubFetch(`/repos/${owner}/${repo}/readme`);
+  const data = await githubFetch(
+    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`
+  );
   const content = Buffer.from(data.content, data.encoding).toString("utf-8");
   return {
     content,

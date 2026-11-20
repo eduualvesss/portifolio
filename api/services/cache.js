@@ -7,7 +7,9 @@
 // response for a few minutes keeps the site fast and keeps it working even
 // if GitHub is slow or temporarily unavailable.
 
+const MAX_ENTRIES = 50;
 const store = new Map();
+const inFlight = new Map();
 
 /**
  * Read a cache entry. Returns { value, isStale } where isStale is true once
@@ -22,6 +24,9 @@ export function get(key) {
 }
 
 export function set(key, value, ttlSeconds) {
+  if (!store.has(key) && store.size >= MAX_ENTRIES) {
+    store.delete(store.keys().next().value);
+  }
   store.set(key, {
     value,
     expiresAt: Date.now() + ttlSeconds * 1000,
@@ -30,8 +35,9 @@ export function set(key, value, ttlSeconds) {
 
 /**
  * Fetch-through helper: return the cached value if it is still fresh,
- * otherwise call `loader`. If `loader` throws and a stale copy exists,
- * serve the stale copy rather than failing the request outright.
+ * otherwise call `loader`. Concurrent callers for the same key share one
+ * in-flight request to avoid cache stampedes. If `loader` throws and a
+ * stale copy exists, serve the stale copy rather than failing outright.
  */
 export async function remember(key, ttlSeconds, loader) {
   const cached = get(key);
@@ -39,16 +45,27 @@ export async function remember(key, ttlSeconds, loader) {
     return { data: cached.value, source: "cache" };
   }
 
-  try {
-    const fresh = await loader();
-    set(key, fresh, ttlSeconds);
-    return { data: fresh, source: "network" };
-  } catch (err) {
-    if (cached) {
-      // Upstream failed, but we have something to show. Serve it and let
-      // the caller flag the response as stale instead of erroring out.
-      return { data: cached.value, source: "stale-cache", error: err };
-    }
-    throw err;
+  if (inFlight.has(key)) {
+    return inFlight.get(key);
   }
+
+  const pending = (async () => {
+    try {
+      const fresh = await loader();
+      set(key, fresh, ttlSeconds);
+      return { data: fresh, source: "network" };
+    } catch (err) {
+      if (cached) {
+        // Upstream failed, but we have something to show. Serve it and let
+        // the caller flag the response as stale instead of erroring out.
+        return { data: cached.value, source: "stale-cache", error: err };
+      }
+      throw err;
+    } finally {
+      inFlight.delete(key);
+    }
+  })();
+
+  inFlight.set(key, pending);
+  return pending;
 }

@@ -9,8 +9,6 @@ export const profile = {
   location: "Recife, Pernambuco, Brazil",
   githubUsername: "eduualvesss",
   githubUrl: "https://github.com/eduualvesss",
-  // TODO: fill these in with your real contact details before sending
-  // this to anyone.
   email: "alvesnunescarloseduardo@gmail.com",
   linkedinUrl: "https://www.linkedin.com/in/eduualvesss/",
 };
@@ -21,17 +19,19 @@ export const profile = {
 export const excludedRepos = ["portifolio"];
 
 export const hero = {
-  eyebrow: "Portfolio / Rev. 2026.2",
+  eyebrow: "Portfolio / Rev. 2026.4",
   headline: "I build the parts of a product nobody else sees.",
   subhead:
     "Systems Analysis and Development student and back-end developer based in Recife, Brazil, currently on the hunt for a back-end internship. I spend most of my time on APIs, data and the systems underneath them, and the rest of it taking hardware apart to see how it fails.",
 };
 
+export const heroBadges = ["Java", "Spring Boot", "Node.js", "TypeScript", "PostgreSQL", "C / C++"];
+
 // Key-value pairs rendered as a datasheet-style spec block next to the
 // hero. Edit freely: add, remove or reorder rows.
 export const specSheet = [
   { label: "Focus", value: "Back-end APIs and systems" },
-  { label: "Toolkit", value: "Java, C, C++, C#, JavaScript, Node.js" },
+  { label: "Toolkit", value: "Java, Spring Boot, Node.js, TypeScript, C, C++, PostgreSQL" },
   { label: "Studying", value: "ADS (Systems Analysis & Development), FICR" },
   { label: "Looking for", value: "Back-end internship opportunities" },
   { label: "Also into", value: "Hardware diagnostics, PC benchmarking" },
@@ -48,7 +48,20 @@ export const about = {
 
 // Two marquee strips reusing the same component: one just below the
 // hero, one just above the footer, running the opposite direction.
-export const toolkitTape = ["NODE.JS", "EXPRESS", "POSTGRESQL", "JAVA", "C", "C++", "C#", "JWT AUTH", "REST APIS", "GIT"];
+export const toolkitTape = [
+  "JAVA",
+  "SPRING BOOT",
+  "NODE.JS",
+  "EXPRESS",
+  "TYPESCRIPT",
+  "POSTGRESQL",
+  "C",
+  "C++",
+  "C#",
+  "JWT AUTH",
+  "REST APIS",
+  "GIT",
+];
 export const signoffTape = [
   "OPEN TO BACK-END INTERNSHIPS",
   "RECIFE, BRAZIL",
@@ -64,9 +77,74 @@ export const projectsSection = {
   heading: "Projects",
   eyebrow: "Live from the GitHub API",
   description:
-    "Everything below is fetched from GitHub at request time by this site's own back end, not hand-typed. Forks and this profile's README repository are filtered out.",
+    "Public repositories are fetched live from the GitHub API (curated via stars); private residency work such as FarolHUB is documented here without exposing source code.",
   emptyState: "No repositories matched the current filters.",
-  errorState: "GitHub did not respond in time. Showing the most recent data this site had cached.",
+  staleState: "GitHub did not respond in time. Showing the most recent data this site had cached.",
+  errorState: "GitHub did not respond in time and no cached data is available right now. Please refresh shortly.",
+  retryLabel: "Retry",
+};
+
+// Closed-source or proprietary residency projects shown in the ledger
+// without exposing any source code repository URL.
+export const privateProjects = [
+  {
+    id: "private-farolhub",
+    name: "FarolHUB",
+    isPrivate: true,
+    statusLabel: "CLOSED SOURCE",
+    description:
+      "HR management platform developed during a technical residency at Porto Digital. Responsible for the back-end architecture: Node.js/Express REST API, PostgreSQL on Neon, JWT authentication, bcrypt password hashing, role-based access control, and audit logging.",
+    language: "Node.js",
+    topics: ["nodejs", "express", "postgresql", "jwt", "porto-digital", "closed-source"],
+    accessLabel: "Closed source",
+    contextLabel: "Porto Digital",
+    updatedAt: "2026-11-17T03:04:23Z",
+    inlineReadme: `# FarolHUB — Closed-Source HR Platform (Porto Digital)
+
+Proprietary HR management platform built during a technical residency at **Porto Digital**, where I led the back-end architecture and implementation.
+
+## Back-end Architecture
+
+- **Runtime & API:** \`Node.js\` + \`Express\` REST API
+- **Database:** \`PostgreSQL\` hosted on \`Neon\`
+- **Security:** Stateless \`JWT\` authentication, \`bcrypt\` password hashing, account approval workflows, and role-based permissions
+- **Traceability:** Structured \`audit log\` tracking sensitive HR and administrative operations
+
+## Covered Product Domains
+
+- **Authentication & Onboarding:** Login, registration requests, password recovery, and admin account approval
+- **People Management:** Employee directory, individual records, org chart, and document attachments
+- **HR Routines & Benefits:** Vacation scheduling, medical certificates/INSS, ASO health tracking, health plan, transit, and Pluxee benefits
+- **Governance & Analytics:** Cost centers, turnover indicators, management workflows, reports, and system audit logs
+
+> **Repository access:** This project's production codebase is private/proprietary and is intentionally omitted from public source links.`,
+  },
+];
+
+// Fallback descriptions and topics for public GitHub repositories when
+// those fields are omitted on GitHub. Live GitHub metadata still wins
+// whenever present.
+export const projectOverrides = {
+  "api-de-gestao-e-compartilhamento-de-promocoes": {
+    description:
+      "E-commerce catalog and promotions REST API built with Java 17, Spring Boot 3.3, Spring Data JPA, Strategy-pattern coupon/discount engine, pessimistic stock locking, and PostgreSQL.",
+    topics: ["java-17", "spring-boot", "postgresql", "jpa", "strategy-pattern", "rest-api"],
+  },
+  performancereader: {
+    topics: ["java", "minecraft-fabric", "dotnet", "telemetry", "gradle"],
+  },
+  fragboost: {
+    topics: ["powershell", "winforms", "windows-optimization", "registry-backup"],
+  },
+  studium: {
+    topics: ["javascript", "html-css", "github-api", "local-storage"],
+  },
+  "projeto-mercadinho": {
+    topics: ["c", "binary-io", "pos-system", "inventory"],
+  },
+  "projeto-codefromscratch": {
+    topics: ["cpp", "programming-logic", "study-planner"],
+  },
 };
 
 export const contact = {

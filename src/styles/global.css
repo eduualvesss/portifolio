@@ -1,25 +1,28 @@
 /* ---------------------------------------------------------------------
    Design tokens
-   A dark bench-instrument variant of the same datasheet aesthetic:
-   PCB-substrate background (not flat #000), hairline rules instead of
-   borders-with-shadows, one functional accent colour (muted phosphor
-   green, used only for live/active signal) and a second used only for
-   stale status text. No shadows, no gradients, by choice. A small
-   radius on boxed elements only — hairlines and rules stay sharp.
+   Carbon + Crimson obsidian instrument palette: #080808 substrate,
+   frosted carbon glass cards, pure white typography, flat-square #24292f
+   stack badges, and a single crimson (#dc3c3c) signal accent.
 ------------------------------------------------------------------------ */
 
 :root {
-  --paper: #0d110f;
-  --paper-raised: #151c17;
-  --ink: #edf1ec;
-  --ink-soft: #9aa69d;
-  --ink-faint: #59645d;
-  --line: #232d27;
-  --line-strong: #edf1ec;
-  --accent: #5aa579;
-  --accent-ink: #07100a;
-  --status-live: #5aa579;
-  --status-stale: #c98a4c;
+  --paper: #080808;
+  --paper-raised: #141416;
+  --surface-glass: rgba(24, 24, 27, 0.62);
+  --surface-glass-hover: rgba(30, 30, 34, 0.78);
+  --badge-bg: #24292f;
+  --ink: #ffffff;
+  --ink-soft: #a6a6ae;
+  --ink-faint: #676770;
+  --line: rgba(255, 255, 255, 0.11);
+  --line-strong: rgba(255, 255, 255, 0.26);
+  --accent: #dc3c3c;
+  --accent-soft: rgba(220, 60, 60, 0.14);
+  --accent-ink: #ffffff;
+  --cta-bg: #ffffff;
+  --cta-ink: #080808;
+  --status-live: #dc3c3c;
+  --status-stale: #d4944c;
 
   --font-display: "Archivo Expanded", "Arial Narrow", sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
@@ -40,7 +43,13 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: radial-gradient(
+    ellipse 75% 420px at 50% 0%,
+    rgba(220, 60, 60, 0.075),
+    transparent 72%
+  );
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
@@ -64,10 +73,9 @@ a:hover {
   text-decoration-color: var(--accent);
 }
 
-/* No animated transitions on hover states, by design. */
 a,
 button {
-  transition: none;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
 }
 
 button {

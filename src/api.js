@@ -1,8 +1,8 @@
 // Frontend and API are deployed as one Vercel project, so these are
 // always same-origin, relative requests. No base URL to configure.
 
-async function get(path) {
-  const res = await fetch(path);
+async function get(path, { signal } = {}) {
+  const res = await fetch(path, { signal });
   const isStale = res.headers.get("X-Data-Source") === "stale-cache";
 
   if (!res.ok) {
@@ -14,14 +14,14 @@ async function get(path) {
   return { data, isStale };
 }
 
-export function getProfile() {
-  return get("/api/profile");
+export function getProfile(options) {
+  return get("/api/profile", options);
 }
 
-export function getRepos() {
-  return get("/api/repos");
+export function getRepos(options) {
+  return get("/api/repos", options);
 }
 
-export function getReadme(owner, repo) {
-  return get(`/api/repos/${owner}/${repo}/readme`);
+export function getReadme(owner, repo, options) {
+  return get(`/api/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`, options);
 }

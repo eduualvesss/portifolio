@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#080808" />
+  <rect x="1.5" y="1.5" width="29" height="29" rx="5" fill="none" stroke="#26262a" stroke-width="1" />
+  <circle cx="25" cy="7" r="2" fill="#dc3c3c" />
+  <text
+    x="5.5"
+    y="21.5"
+    fill="#ffffff"
+    font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    font-size="13"
+    font-weight="700"
+    letter-spacing="-0.5"
+  >
+    EA
+  </text>
+  <rect x="6" y="24.5" width="11" height="1.5" fill="#dc3c3c" />
+</svg>

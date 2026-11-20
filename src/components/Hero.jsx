@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { hero, specSheet, profile } from "../content.js";
+import { useEffect, useRef, useState } from "react";
+import { hero, heroBadges, specSheet, profile } from "../content.js";
 import Reveal from "./Reveal.jsx";
 import "../styles/hero.css";
 
@@ -8,6 +8,11 @@ const SIGNAL_PATH =
 
 export default function Hero({ liveStats }) {
   const pathRef = useRef(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [liveStats?.avatarUrl]);
 
   useEffect(() => {
     const path = pathRef.current;
@@ -28,6 +33,8 @@ export default function Hero({ liveStats }) {
     });
   }, []);
 
+  const showLiveAvatar = Boolean(liveStats?.avatarUrl) && !avatarFailed;
+
   return (
     <section id="top" className="hero">
       <div className="wrap hero__grid">
@@ -41,18 +48,45 @@ export default function Hero({ liveStats }) {
           <Reveal as="p" className="hero__subhead" delay={0.16}>
             {hero.subhead}
           </Reveal>
+          <Reveal as="ul" className="hero__badges" delay={0.2} aria-label="Core stack">
+            {heroBadges.map((badge) => (
+              <li className="hero__badge" key={badge}>
+                {badge}
+              </li>
+            ))}
+          </Reveal>
           <Reveal as="div" className="hero__actions" delay={0.24}>
             <a className="hero__button" href="#projects">
               View projects
             </a>
-            <a className="hero__link" href={profile.githubUrl} target="_blank" rel="noreferrer">
+            <a className="hero__link" href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
               github.com/{profile.githubUsername}
             </a>
           </Reveal>
         </div>
 
         <Reveal as="dl" className="spec-block" delay={0.2} aria-label="Summary">
-          <div className="spec-block__title">SPEC</div>
+          <div className="spec-block__profile">
+            {showLiveAvatar ? (
+              <img
+                className="spec-block__avatar"
+                src={liveStats.avatarUrl}
+                alt={profile.name}
+                width="44"
+                height="44"
+                onError={() => setAvatarFailed(true)}
+              />
+            ) : (
+              <div className="spec-block__avatar spec-block__avatar--fallback" aria-hidden="true">
+                EA
+              </div>
+            )}
+            <div className="spec-block__identity">
+              <div className="spec-block__handle">@{profile.githubUsername}</div>
+              <div className="spec-block__sub">Recife, PE · Porto Digital</div>
+            </div>
+            <span className="spec-block__tag">SPEC</span>
+          </div>
           {specSheet.map((row) => (
             <div className="spec-block__row" key={row.label}>
               <dt>{row.label}</dt>
@@ -72,6 +106,15 @@ export default function Hero({ liveStats }) {
 
       <div className="wrap signal">
         <svg viewBox="0 0 1000 90" preserveAspectRatio="none" aria-hidden="true">
+          <g className="signal__grid">
+            <line x1="0" y1="22" x2="1000" y2="22" strokeDasharray="4 6" />
+            <line x1="0" y1="45" x2="1000" y2="45" strokeDasharray="4 6" />
+            <line x1="0" y1="68" x2="1000" y2="68" strokeDasharray="4 6" />
+            <line x1="200" y1="0" x2="200" y2="90" />
+            <line x1="400" y1="0" x2="400" y2="90" />
+            <line x1="600" y1="0" x2="600" y2="90" />
+            <line x1="800" y1="0" x2="800" y2="90" />
+          </g>
           <path ref={pathRef} d={SIGNAL_PATH} />
         </svg>
         <div className="signal__caption">

@@ -10,6 +10,14 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 // behaviour on your machine instead of a plain `node` process.
 
 const app = express();
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
+
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
 
 // Protects this API from abuse, independent of GitHub's own rate limit.
 // Note: on Vercel this counter lives in the memory of a single warm
